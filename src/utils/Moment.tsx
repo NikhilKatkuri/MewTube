@@ -28,6 +28,5 @@ const myMoment = (dateInput: string) => {
     },
   };
 };
-myMoment('2020-01-23T14:18:52Z').format();
 
 export default myMoment;
