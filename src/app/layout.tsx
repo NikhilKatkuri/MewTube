@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { SuperProvider } from '@/context/SuperContext';
+import Navbar from '@/components/Navbar';
+import Sidebar from '@/components/client/Sidebar';
 
 export const metadata: Metadata = {
   title: 'MewTube',
@@ -17,7 +19,15 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <SuperProvider>
-          <SidebarProvider>{children}</SidebarProvider>
+          <SidebarProvider>
+            <div className="flex h-screen w-screen flex-col bg-white">
+              <Navbar />
+              <div className="flex max-h-[calc(100%-64px)] flex-1">
+                <Sidebar />
+                {children}
+              </div>
+            </div>
+          </SidebarProvider>
         </SuperProvider>
       </body>
     </html>

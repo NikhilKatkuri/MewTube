@@ -6,7 +6,7 @@ import myMoment from '@/utils/Moment';
 import RoundedFormat from '@/utils/RoundedFormat';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-
+import { useRouter } from 'next/navigation';
 const LazyLoader = () => {
   return (
     <div className="aspect-video w-full p-3">
@@ -26,10 +26,10 @@ const LazyLoader = () => {
   );
 };
 const Feed = () => {
-  const { isDesktopSidebarOpen } = useSidebar();
+  const { isDesktopSidebarOpen, setisDesktopSidebarOpen } = useSidebar();
   const { FeedData } = useSuper();
   const [avgColors, setAvgColors] = useState<Record<number, string>>({});
-
+  const router = useRouter();
   useEffect(() => {
     if (FeedData) {
       FeedData.forEach(async (item, index) => {
@@ -52,12 +52,18 @@ const Feed = () => {
           ? FeedData.map((item, index) => {
               return (
                 <div
+                  onClick={() => {
+                    router.push(`/watch?v=${item.id}`);
+                    setTimeout(() => {
+                      setisDesktopSidebarOpen(false);
+                    }, 300);
+                  }}
                   key={index}
                   data-hover-color={avgColors[index] ?? 'rgba(0, 128, 255, 0.3)'}
                   style={{
                     ['--hover-color' as string]: avgColors[index] ?? 'rgba(0, 128, 255, 0.3)',
                   }}
-                  className="aspect-video w-full rounded-2xl p-3"
+                  className="aspect-video w-full cursor-pointer rounded-2xl p-3"
                 >
                   <div className="semi-dynamic-hover h-full w-full overflow-hidden rounded-xl bg-black/10">
                     <Image
