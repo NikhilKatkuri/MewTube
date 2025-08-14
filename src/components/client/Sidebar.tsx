@@ -3,7 +3,7 @@
 import { useSidebar } from '@/context/SidebarContext';
 import Link from 'next/link';
 import ToggleBar from './TogglerBar';
-import { JSX } from 'react';
+import { JSX, useEffect, useState } from 'react';
 import {
   ChevronRightIcon,
   GithubIcon,
@@ -19,20 +19,26 @@ import {
   SubscriptionIconFill,
   WatchLaterIcon,
 } from '@/icons/MewIcons';
+import { usePathname, useRouter } from 'next/navigation';
 
 const Sidebar = () => {
   const BoxUI = ({
     Icon,
     text,
-    className,
+    classNamediv,
+    action,
   }: {
     Icon: JSX.Element;
     text: string;
-    className?: string;
+    classNamediv?: string;
+    action?: () => void;
   }) => {
     return (
       <button
-        className={`flex ${!isDesktopSidebarOpen ? '2xl:flex-col 2xl:items-center 2xl:justify-center' : ''} cursor-pointer items-center ${isDesktopSidebarOpen ? 'gap-6 hover:bg-black/5' : 'gap-1'} rounded-2xl px-3 py-2 ${className}`}
+        onClick={() => {
+          action?.();
+        }}
+        className={`flex ${!isDesktopSidebarOpen ? '2xl:flex-col 2xl:items-center 2xl:justify-center' : ''} cursor-pointer items-center ${isDesktopSidebarOpen ? 'gap-6 hover:bg-black/5' : 'gap-1'} rounded-lg px-3 py-2 ${classNamediv}`}
       >
         <span>{Icon}</span>
 
@@ -45,6 +51,13 @@ const Sidebar = () => {
     );
   };
   const { isSidebarOpen, isDesktopSidebarOpen } = useSidebar();
+  const router = useRouter();
+  const [selected, setselected] = useState<string>('/');
+  const pn = usePathname();
+  useEffect(() => {
+    setselected(pn);
+  }, [pn]);
+
   return (
     <aside
       className={`h-full w-72 max-2xl:fixed max-2xl:top-0 max-2xl:z-10 ${
@@ -60,17 +73,40 @@ const Sidebar = () => {
         </div>
         <div className="mt-2 flex flex-col gap-0.5">
           <BoxUI
-            Icon={true ? <HomeIconFill className="size-6" /> : <HomeIcon className="size-6" />}
-            text="Home"
-            className={isDesktopSidebarOpen ? 'bg-black/4' : ''}
-          />
-          <BoxUI
-            Icon={!true ? <ShortIconFill className="size-6" /> : <ShortIcon className="size-6" />}
-            text="Shorts"
-          />
-          <BoxUI
+            action={() => {
+              router.push('/');
+            }}
             Icon={
-              !true ? (
+              selected === '/' ? (
+                <HomeIconFill className="size-6" />
+              ) : (
+                <HomeIcon className="size-6" />
+              )
+            }
+            text="Home"
+            classNamediv={selected === '/' ? 'bg-black/4' : ''}
+          />
+          <BoxUI
+            action={() => {
+              router.push('/shorts');
+            }}
+            Icon={
+              selected.includes('/shorts') ? (
+                <ShortIconFill className="size-6" />
+              ) : (
+                <ShortIcon className="size-6" />
+              )
+            }
+            text="Shorts"
+            classNamediv={selected.includes('/shorts') ? 'bg-black/5' : ''}
+          />
+          <BoxUI
+            action={() => {
+              router.push('/Subscriptions');
+            }}
+            classNamediv={selected.includes('/Subscriptions') ? 'bg-black/5' : ''}
+            Icon={
+              selected.includes('/Subscriptions') ? (
                 <SubscriptionIconFill className="size-6" />
               ) : (
                 <SubscriptionIcon className="size-6" />
@@ -91,7 +127,7 @@ const Sidebar = () => {
               <ChevronRightIcon className="" />
             </span>
           </button>
-          <BoxUI Icon={<HistoryIcon className="size-6" />} text="History" className="" />
+          <BoxUI Icon={<HistoryIcon className="size-6" />} text="History" classNamediv="" />
           <BoxUI Icon={<LikeIcon className="size-6" />} text="Liked Videos" />
           <BoxUI Icon={<WatchLaterIcon className="size-6" />} text="Watch Later" />
           <BoxUI Icon={<SettingIcon className="size-6" />} text="Setting" />

@@ -1,7 +1,6 @@
 // home page
 import NavigationBar from '@/components/client/NavigationBar';
 import Feed from '@/components/renders/Feed';
-// import Feed from '@/components/renders/Feed';
 import React from 'react';
 
 const Home = () => {
