@@ -109,4 +109,15 @@ interface YouTubeFeedData {
   statistics: Statistics;
   channelData: ChannelData;
 }
+export interface YouTubeSearchData {
+  kind: string;
+  etag: string;
+  id: {
+    videoId: string;
+  };
+  snippet: Snippet;
+  contentDetails: ContentDetails;
+  statistics: Statistics;
+  channelData: ChannelData;
+}
 export default YouTubeFeedData;

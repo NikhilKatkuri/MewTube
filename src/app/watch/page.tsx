@@ -2,16 +2,17 @@
 import TrayBox from '@/components/renders/TrayBox';
 import { useSuper } from '@/context/SuperContext';
 import { CommentIcon, LikeIcon } from '@/icons/MewIcons';
-import YouTubeFeedData from '@/models/Youtube_api_models';
+import YouTubeFeedData, { YouTubeSearchData } from '@/models/Youtube_api_models';
 import RoundedFormat from '@/utils/RoundedFormat';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 
 const Watch = () => {
-  const { FeedData } = useSuper();
+  const { FeedData, searchData } = useSuper();
   const params = useSearchParams();
   const VideoId = params.get('v');
+  const ref = params.get('ref');
   const [subscribe, setsubscribe] = useState<boolean>(false);
   const Months = [
     'jan',
@@ -33,9 +34,28 @@ const Watch = () => {
     return <div className="py-10 text-center">Loading...</div>;
   }
 
-  const videoData: YouTubeFeedData | undefined = FeedData?.find((a) => a.id === VideoId);
-  const SidevideoData: YouTubeFeedData[] | undefined = FeedData?.filter((a) => a.id !== VideoId);
-  if (!videoData) {
+  if (VideoId === undefined || VideoId === null)
+    return (
+      <div className="py-10 text-center text-red-600">
+        Error: Video not found. Please check the video ID or try again later2.
+      </div>
+    );
+  let videoData: YouTubeFeedData | YouTubeSearchData | undefined = undefined;
+  let SidevideoData: YouTubeFeedData[] | undefined | YouTubeSearchData[] = undefined;
+  if (ref === 'search') {
+    videoData = searchData?.find((a) => a.id.videoId === VideoId);
+    SidevideoData = searchData?.filter((a) => a.id.videoId !== VideoId);
+  } else {
+    videoData = FeedData?.find((a) => a.id === VideoId);
+    SidevideoData = FeedData?.filter((a) => a.id !== VideoId);
+  }
+
+  if (
+    videoData === undefined ||
+    videoData === null ||
+    SidevideoData === undefined ||
+    SidevideoData === null
+  ) {
     return (
       <div className="py-10 text-center text-red-600">
         Error: Video not found. Please check the video ID or try again later.
@@ -61,53 +81,59 @@ const Watch = () => {
           <div className={'max-w-4xl px-1'}>
             <div className="space-y-3">
               <h1 className="text-xl font-bold">{videoData.snippet.title}</h1>
-              <div className="flex flex-col max-sm:gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="grid grid-cols-[48px_auto]">
-                  <Image
-                    src={videoData.channelData.snippet.thumbnails.high.url}
-                    alt={videoData.channelData.snippet.id}
-                    height={36}
-                    width={36}
-                    className="rounded-full"
-                  />
-                  <div className="flex items-center gap-3">
-                    <div className="-space-y-0.5">
-                      <h1 className="font-bold">{videoData.channelData.snippet.title}</h1>
-                      <p className="text-sm">
-                        <span>
-                          {RoundedFormat(Number(videoData.channelData.statistics.subscriberCount))}
-                        </span>{' '}
-                        <span>subscribers</span>
-                      </p>
+              {ref !== 'search' && (
+                <div className="flex flex-col max-sm:gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="grid grid-cols-[48px_auto]">
+                    <Image
+                      src={videoData.channelData.snippet.thumbnails.high.url}
+                      alt={videoData.channelData.snippet.id}
+                      height={36}
+                      width={36}
+                      className="rounded-full"
+                    />
+                    <div className="flex items-center gap-3">
+                      <div className="-space-y-0.5">
+                        <h1 className="font-bold">{videoData.channelData.snippet.title}</h1>
+                        <p className="text-sm">
+                          <span>
+                            {RoundedFormat(
+                              Number(videoData.channelData.statistics.subscriberCount),
+                            )}
+                          </span>{' '}
+                          <span>subscribers</span>
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setsubscribe((prev) => !prev);
+                        }}
+                        className="rounded-full bg-black px-6 py-2 text-white transition-all duration-150 ease-in-out active:scale-95"
+                      >
+                        <span className="text-sm font-bold">
+                          {subscribe ? 'Subscribed' : 'Subscribe'}
+                        </span>
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        setsubscribe((prev) => !prev);
-                      }}
-                      className="rounded-full bg-black px-6 py-2 text-white transition-all duration-150 ease-in-out active:scale-95"
-                    >
-                      <span className="text-sm font-bold">
-                        {subscribe ? 'Subscribed' : 'Subscribe'}
-                      </span>
-                    </button>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="flex cursor-pointer items-center space-x-1 rounded-full border border-black/10 bg-black/5 px-3 py-2 text-sm font-semibold hover:bg-black/10">
+                      <LikeIcon className="size-5" />
+
+                      <span>{RoundedFormat(Number(videoData.statistics.likeCount))}</span>
+                    </div>
+                    <div className="flex cursor-pointer items-center space-x-2 rounded-full border border-black/10 bg-black/5 px-3 py-2 text-sm font-semibold hover:bg-black/10">
+                      <CommentIcon className="size-5" />
+
+                      <span>{' ' + RoundedFormat(Number(videoData.statistics.commentCount))}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <div className="flex cursor-pointer items-center space-x-1 rounded-full border border-black/10 bg-black/5 px-3 py-2 text-sm font-semibold hover:bg-black/10">
-                    <LikeIcon className="size-5" />
-
-                    <span>{RoundedFormat(Number(videoData.statistics.likeCount))}</span>
-                  </div>
-                  <div className="flex cursor-pointer items-center space-x-2 rounded-full border border-black/10 bg-black/5 px-3 py-2 text-sm font-semibold hover:bg-black/10">
-                    <CommentIcon className="size-5" />
-
-                    <span>{' ' + RoundedFormat(Number(videoData.statistics.commentCount))}</span>
-                  </div>
-                </div>
-              </div>
+              )}
               <div className="relative rounded-xl bg-black/5 p-2.5 text-sm font-medium">
                 <p className="space-x-3 font-bold">
-                  <span>{RoundedFormat(Number(videoData.statistics.viewCount))} views</span>
+                  {ref !== 'search' && (
+                    <span>{RoundedFormat(Number(videoData.statistics.viewCount))} views</span>
+                  )}
                   <span>
                     {Months[PublisedDate.getMonth()].charAt(0).toUpperCase() +
                       Months[PublisedDate.getMonth()].slice(1) +
@@ -144,7 +170,7 @@ const Watch = () => {
           </div>
           <div className="grid grid-cols-1 gap-3 overflow-y-scroll">
             {SidevideoData.map((data, index) => {
-              return <TrayBox VideoData={data} key={index} />;
+              return <TrayBox VideoData={data} key={index} ref={ref === 'search'} />;
             })}
           </div>
         </div>

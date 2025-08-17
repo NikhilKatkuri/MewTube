@@ -1,11 +1,14 @@
 'use client';
 
-import YouTubeFeedData from '@/models/Youtube_api_models';
+import YouTubeFeedData, { YouTubeSearchData } from '@/models/Youtube_api_models';
+import useApiUrls from '@/utils/useAPIurl';
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface SuperContextType {
   FeedData: YouTubeFeedData[] | null;
   setFeedData: (FeedData: YouTubeFeedData[] | null) => void;
+  searchData: YouTubeSearchData[] | null;
+  setSearchData: (searchData: YouTubeSearchData[] | null) => void;
 }
 
 const SuperContext = createContext<SuperContextType | undefined>(undefined);
@@ -13,12 +16,8 @@ const SuperContext = createContext<SuperContextType | undefined>(undefined);
 export const SuperProvider = ({ children }: { children: ReactNode }) => {
   const [FeedData, setFeedData] = useState<YouTubeFeedData[] | null>(null);
   async function loader() {
-    const req = await fetch('/api/videos/', {
-      headers: {
-        'x-api-key': `nik-12-08-2025`,
-      },
-    });
-    const res = await req.json();
+    const req = new useApiUrls();
+    const res = await req.useFeed();
     setTimeout(() => {
       setFeedData(res.Data);
     }, 1000);
@@ -26,9 +25,11 @@ export const SuperProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     loader();
   }, []);
-
+  const [searchData, setSearchData] = useState<YouTubeSearchData[] | null>(null);
   return (
-    <SuperContext.Provider value={{ FeedData, setFeedData }}>{children}</SuperContext.Provider>
+    <SuperContext.Provider value={{ FeedData, setFeedData, searchData, setSearchData }}>
+      {children}
+    </SuperContext.Provider>
   );
 };
 

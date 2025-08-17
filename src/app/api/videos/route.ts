@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
   }
 
   const data = {
-    message: 'Hello from backend!',
     Data: feeddata,
   };
 
