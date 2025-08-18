@@ -11,7 +11,7 @@ const Search = () => {
   // const params = useSearchParams();
   // const query = params.get('query');
   const { searchData } = useSuper();
-  console.log(searchData);
+  if (!searchData) return null;
   return (
     <main className="flex w-full flex-1 flex-col">
       <div className="flex-1 overflow-y-auto max-xl:px-1">

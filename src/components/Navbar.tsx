@@ -17,9 +17,9 @@ const Navbar = () => {
     try {
       const data = new useApiUrls();
       const res = await data.useSearchKey(q);
-      console.log(res.results);
       setSearchData(res.results);
       router.push(`/search?q=${q}`);
+      setQuery('');
     } catch (err) {
       console.error(err);
     }
